@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import Navigation from "@/components/Navigation";
@@ -9,9 +10,29 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, ArrowRight } from "lucide-react";
+import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
+import { id } from 'date-fns/locale';
 import servicesHero from "@/assets/services-hero.jpg";
 
+interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  image_url: string;
+  author: string;
+  created_at: string;
+  category: string;
+  read_time: number;
+}
+
 const Blog = () => {
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState("All");
+  const navigate = useNavigate();
+
   useEffect(() => {
     AOS.init({
       duration: 1000,
@@ -21,76 +42,37 @@ const Blog = () => {
     });
   }, []);
 
-  const blogPosts = [
-    {
-      id: 1,
-      title: "5 Alasan Mengapa Bisnis Anda Butuh Website di 2024",
-      excerpt: "Di era digital ini, website bukan lagi pilihan tapi kebutuhan. Simak 5 alasan utama mengapa bisnis Anda harus memiliki website.",
-      image: servicesHero,
-      author: "Tim Artweb",
-      date: "15 Desember 2024",
-      category: "Bisnis Digital",
-      readTime: "5 menit",
-      featured: true
-    },
-    {
-      id: 2,
-      title: "Panduan Lengkap Memilih Domain dan Hosting yang Tepat",
-      excerpt: "Tips memilih domain dan hosting yang sesuai untuk website bisnis Anda. Pertimbangan penting sebelum membeli domain.",
-      image: servicesHero,
-      author: "Tim Artweb",
-      date: "12 Desember 2024",
-      category: "Tutorial",
-      readTime: "7 menit",
-      featured: false
-    },
-    {
-      id: 3,
-      title: "Tren Desain Website 2024: Minimalis dan User-Friendly",
-      excerpt: "Desain website yang modern dan menarik adalah kunci kesuksesan. Pelajari tren desain terbaru untuk website Anda.",
-      image: servicesHero,
-      author: "Tim Artweb",
-      date: "10 Desember 2024",
-      category: "Design",
-      readTime: "6 menit",
-      featured: false
-    },
-    {
-      id: 4,
-      title: "SEO Dasar untuk Pemula: Optimasi Website Step by Step",
-      excerpt: "Panduan lengkap SEO untuk pemula. Langkah-langkah praktis mengoptimalkan website agar mudah ditemukan di Google.",
-      image: servicesHero,
-      author: "Tim Artweb",
-      date: "8 Desember 2024",
-      category: "SEO",
-      readTime: "8 menit",
-      featured: false
-    },
-    {
-      id: 5,
-      title: "Keamanan Website: Melindungi Bisnis dari Ancaman Cyber",
-      excerpt: "Tips penting untuk menjaga keamanan website bisnis Anda. Langkah preventif yang harus dilakukan setiap pemilik website.",
-      image: servicesHero,
-      author: "Tim Artweb",
-      date: "5 Desember 2024",
-      category: "Keamanan",
-      readTime: "6 menit",
-      featured: false
-    },
-    {
-      id: 6,
-      title: "Mobile-First Design: Mengapa Responsive Design Penting",
-      excerpt: "Lebih dari 60% pengguna internet mengakses website melalui mobile. Pelajari pentingnya responsive design.",
-      image: servicesHero,
-      author: "Tim Artweb",
-      date: "3 Desember 2024",
-      category: "Mobile",
-      readTime: "5 menit",
-      featured: false
-    }
-  ];
+  useEffect(() => {
+    fetchBlogPosts();
+  }, []);
 
-  const categories = ["Semua", "Bisnis Digital", "Tutorial", "Design", "SEO", "Keamanan", "Mobile"];
+  const fetchBlogPosts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('published', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching blog posts:', error);
+      } else {
+        setBlogPosts(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching blog posts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const categories = ["All", "Web Development", "Design", "SEO", "Mobile", "Security", "E-Commerce"];
+
+  const filteredPosts = activeCategory === "All" 
+    ? blogPosts 
+    : blogPosts.filter(post => post.category === activeCategory);
+
+  const featuredPost = blogPosts[0];
 
   return (
     <div className="min-h-screen bg-background">
@@ -114,8 +96,9 @@ const Blog = () => {
             {categories.map((category, index) => (
               <Badge
                 key={index}
-                variant={index === 0 ? "default" : "secondary"}
+                variant={activeCategory === category ? "default" : "secondary"}
                 className="cursor-pointer hover:scale-105 transition-transform"
+                onClick={() => setActiveCategory(category)}
               >
                 {category}
               </Badge>
@@ -123,92 +106,125 @@ const Blog = () => {
           </div>
 
           {/* Featured Post */}
-          <div className="mb-16" data-aos="fade-up">
-            <Card className="overflow-hidden shadow-medium hover:shadow-strong transition-all duration-300">
-              <div className="md:flex">
-                <div className="md:w-1/2">
-                  <img 
-                    src={blogPosts[0].image} 
-                    alt={blogPosts[0].title}
-                    className="w-full h-64 md:h-full object-cover"
-                  />
-                </div>
-                <div className="md:w-1/2 p-8">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <Badge className="bg-gradient-hero">Featured</Badge>
-                    <Badge variant="outline">{blogPosts[0].category}</Badge>
+          {!loading && featuredPost && (
+            <div className="mb-16" data-aos="fade-up">
+              <Card className="overflow-hidden shadow-medium hover:shadow-strong transition-all duration-300">
+                <div className="md:flex">
+                  <div className="md:w-1/2">
+                    <img 
+                      src={featuredPost.image_url} 
+                      alt={featuredPost.title}
+                      className="w-full h-64 md:h-full object-cover"
+                    />
                   </div>
-                  <h2 className="text-3xl font-bold text-foreground mb-4 hover:text-primary transition-colors">
-                    {blogPosts[0].title}
-                  </h2>
-                  <p className="text-muted-foreground mb-6 line-clamp-3">
-                    {blogPosts[0].excerpt}
-                  </p>
-                  <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-6">
-                    <div className="flex items-center space-x-1">
-                      <User className="w-4 h-4" />
-                      <span>{blogPosts[0].author}</span>
+                  <div className="md:w-1/2 p-8">
+                    <div className="flex items-center space-x-4 mb-4">
+                      <Badge className="bg-gradient-hero">Featured</Badge>
+                      <Badge variant="outline">{featuredPost.category}</Badge>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <Calendar className="w-4 h-4" />
-                      <span>{blogPosts[0].date}</span>
+                    <h2 className="text-3xl font-bold text-foreground mb-4 hover:text-primary transition-colors">
+                      {featuredPost.title}
+                    </h2>
+                    <p className="text-muted-foreground mb-6 line-clamp-3">
+                      {featuredPost.excerpt}
+                    </p>
+                    <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-6">
+                      <div className="flex items-center space-x-1">
+                        <User className="w-4 h-4" />
+                        <span>{featuredPost.author}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>{format(new Date(featuredPost.created_at), 'dd MMMM yyyy', { locale: id })}</span>
+                      </div>
+                      <span>•</span>
+                      <span>{featuredPost.read_time} menit</span>
                     </div>
-                    <span>•</span>
-                    <span>{blogPosts[0].readTime}</span>
-                  </div>
-                  <Button variant="hero" className="group">
-                    Baca Selengkapnya
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          {/* Blog Posts Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts.slice(1).map((post, index) => (
-              <Card key={post.id} className="overflow-hidden shadow-soft hover:shadow-medium transition-all duration-300 hover:scale-105" data-aos="fade-up" data-aos-delay={index * 100}>
-                <div className="relative">
-                  <img 
-                    src={post.image} 
-                    alt={post.title}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <Badge variant="secondary">{post.category}</Badge>
-                  </div>
-                </div>
-                <CardHeader>
-                  <CardTitle className="text-xl hover:text-primary transition-colors cursor-pointer">
-                    {post.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4 line-clamp-3">
-                    {post.excerpt}
-                  </p>
-                  <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-4">
-                    <div className="flex items-center space-x-1">
-                      <User className="w-4 h-4" />
-                      <span>{post.author}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Calendar className="w-4 h-4" />
-                      <span>{post.date}</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">{post.readTime}</span>
-                    <Button variant="outline" size="sm" className="group">
-                      Baca
+                    <Button 
+                      variant="hero" 
+                      className="group"
+                      onClick={() => navigate(`/blog/${featuredPost.slug}`)}
+                    >
+                      Baca Selengkapnya
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </div>
-                </CardContent>
+                </div>
               </Card>
-            ))}
-          </div>
+            </div>
+          )}
+
+          {/* Blog Posts Grid */}
+          {loading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} className="overflow-hidden shadow-soft animate-pulse">
+                  <div className="h-48 bg-muted"></div>
+                  <CardHeader>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-muted rounded w-3/4"></div>
+                      <div className="h-6 bg-muted rounded"></div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-muted rounded"></div>
+                      <div className="h-4 bg-muted rounded w-5/6"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredPosts.slice(1).map((post, index) => (
+                <Card key={post.id} className="overflow-hidden shadow-soft hover:shadow-medium transition-all duration-300 hover:scale-105" data-aos="fade-up" data-aos-delay={index * 100}>
+                  <div className="relative">
+                    <img 
+                      src={post.image_url} 
+                      alt={post.title}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="absolute top-4 left-4">
+                      <Badge variant="secondary">{post.category}</Badge>
+                    </div>
+                  </div>
+                  <CardHeader>
+                    <CardTitle className="text-xl hover:text-primary transition-colors cursor-pointer">
+                      {post.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground mb-4 line-clamp-3">
+                      {post.excerpt}
+                    </p>
+                    <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-4">
+                      <div className="flex items-center space-x-1">
+                        <User className="w-4 h-4" />
+                        <span>{post.author}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>{format(new Date(post.created_at), 'dd MMM yyyy', { locale: id })}</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">{post.read_time} menit</span>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="group"
+                        onClick={() => navigate(`/blog/${post.slug}`)}
+                      >
+                        Baca
+                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
           {/* Load More */}
           <div className="text-center mt-12" data-aos="fade-up">

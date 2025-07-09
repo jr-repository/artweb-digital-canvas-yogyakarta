@@ -1,348 +1,731 @@
-import { useState } from "react";
-import { Plus, Edit, Trash2, Eye, Upload, Save, X } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  Plus, 
+  Edit, 
+  Trash2, 
+  Eye, 
+  BarChart3,
+  Users,
+  FileText,
+  Settings,
+  LogOut
+} from 'lucide-react';
+
+interface PortfolioItem {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  image_url: string;
+  client: string;
+  year: number;
+  website_url: string;
+  featured: boolean;
+}
+
+interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  image_url: string;
+  author: string;
+  category: string;
+  published: boolean;
+  read_time: number;
+}
 
 const Admin = () => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
-  const [projects, setProjects] = useState([
-    {
-      id: 1,
-      title: "Toko Elektronik Jaya",
-      category: "ecommerce",
-      description: "Website e-commerce untuk toko elektronik dengan fitur pembayaran online dan manajemen stok.",
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop",
-      client: "Toko Elektronik Jaya",
-      year: "2024",
-      url: "#",
-      featured: true
-    },
-    {
-      id: 2,
-      title: "Catering Sari Rasa",
-      category: "company",
-      description: "Website company profile untuk bisnis catering dengan galeri menu dan sistem pemesanan.",
-      image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop",
-      client: "Catering Sari Rasa",
-      year: "2024",
-      url: "#",
-      featured: false
-    }
-  ]);
-
+  
+  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  
   const [isEditMode, setIsEditMode] = useState(false);
-  const [editingProject, setEditingProject] = useState(null);
-  const [formData, setFormData] = useState({
-    title: "",
-    category: "",
-    description: "",
-    image: "",
-    client: "",
-    year: "",
-    url: "",
+  const [editingItem, setEditingItem] = useState<PortfolioItem | BlogPost | null>(null);
+  const [activeTab, setActiveTab] = useState('portfolio');
+  
+  const [portfolioForm, setPortfolioForm] = useState({
+    title: '',
+    category: '',
+    description: '',
+    image_url: '',
+    client: '',
+    year: new Date().getFullYear(),
+    website_url: '',
     featured: false
   });
 
-  const categories = [
-    { id: "company", name: "Company Profile" },
-    { id: "ecommerce", name: "E-commerce" },
-    { id: "portfolio", name: "Portfolio" },
-    { id: "landing", name: "Landing Page" }
-  ];
+  const [blogForm, setBlogForm] = useState({
+    title: '',
+    slug: '',
+    excerpt: '',
+    content: '',
+    image_url: '',
+    author: 'Admin ArtWeb',
+    category: '',
+    published: false,
+    read_time: 5
+  });
 
-  const handleEdit = (project) => {
-    setEditingProject(project);
-    setFormData({ ...project });
+  useEffect(() => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+
+    fetchData();
+  }, [user, navigate]);
+
+  const fetchData = async () => {
+    try {
+      const [portfolioRes, blogRes] = await Promise.all([
+        supabase.from('portfolio').select('*').order('created_at', { ascending: false }),
+        supabase.from('blog_posts').select('*').order('created_at', { ascending: false })
+      ]);
+
+      if (portfolioRes.error) throw portfolioRes.error;
+      if (blogRes.error) throw blogRes.error;
+
+      setPortfolioItems(portfolioRes.data || []);
+      setBlogPosts(blogRes.data || []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch data",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+  };
+
+  // Portfolio handlers
+  const handlePortfolioEdit = (item: PortfolioItem) => {
+    setEditingItem(item);
+    setPortfolioForm({
+      title: item.title,
+      category: item.category,
+      description: item.description || '',
+      image_url: item.image_url,
+      client: item.client || '',
+      year: item.year,
+      website_url: item.website_url || '',
+      featured: item.featured
+    });
     setIsEditMode(true);
   };
 
-  const handleSave = () => {
-    if (editingProject) {
-      setProjects(projects.map(p => 
-        p.id === editingProject.id 
-          ? { ...formData, id: editingProject.id }
-          : p
-      ));
+  const handlePortfolioSave = async () => {
+    try {
+      if (editingItem && 'client' in editingItem) {
+        const { error } = await supabase
+          .from('portfolio')
+          .update(portfolioForm)
+          .eq('id', editingItem.id);
+        
+        if (error) throw error;
+        toast({ title: "Success", description: "Portfolio item updated successfully" });
+      } else {
+        const { error } = await supabase
+          .from('portfolio')
+          .insert([portfolioForm]);
+        
+        if (error) throw error;
+        toast({ title: "Success", description: "Portfolio item created successfully" });
+      }
+      
+      await fetchData();
+      handleCancel();
+    } catch (error) {
+      console.error('Error saving portfolio:', error);
       toast({
-        title: "Project Updated",
-        description: "Project berhasil diupdate!"
-      });
-    } else {
-      const newProject = {
-        ...formData,
-        id: Date.now(),
-      };
-      setProjects([...projects, newProject]);
-      toast({
-        title: "Project Added",
-        description: "Project baru berhasil ditambahkan!"
+        title: "Error",
+        description: "Failed to save portfolio item",
+        variant: "destructive"
       });
     }
-    
-    setIsEditMode(false);
-    setEditingProject(null);
-    setFormData({
-      title: "",
-      category: "",
-      description: "",
-      image: "",
-      client: "",
-      year: "",
-      url: "",
-      featured: false
-    });
   };
 
-  const handleDelete = (id) => {
-    setProjects(projects.filter(p => p.id !== id));
-    toast({
-      title: "Project Deleted",
-      description: "Project berhasil dihapus!"
+  const handlePortfolioDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('portfolio')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      await fetchData();
+      toast({ title: "Success", description: "Portfolio item deleted successfully" });
+    } catch (error) {
+      console.error('Error deleting portfolio:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete portfolio item",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Blog handlers
+  const handleBlogEdit = (post: BlogPost) => {
+    setEditingItem(post);
+    setBlogForm({
+      title: post.title,
+      slug: post.slug,
+      excerpt: post.excerpt || '',
+      content: post.content,
+      image_url: post.image_url,
+      author: post.author,
+      category: post.category,
+      published: post.published,
+      read_time: post.read_time
     });
+    setIsEditMode(true);
+  };
+
+  const handleBlogSave = async () => {
+    try {
+      const slug = blogForm.slug || generateSlug(blogForm.title);
+      const formWithSlug = { ...blogForm, slug };
+
+      if (editingItem && 'slug' in editingItem) {
+        const { error } = await supabase
+          .from('blog_posts')
+          .update(formWithSlug)
+          .eq('id', editingItem.id);
+        
+        if (error) throw error;
+        toast({ title: "Success", description: "Blog post updated successfully" });
+      } else {
+        const { error } = await supabase
+          .from('blog_posts')
+          .insert([formWithSlug]);
+        
+        if (error) throw error;
+        toast({ title: "Success", description: "Blog post created successfully" });
+      }
+      
+      await fetchData();
+      handleCancel();
+    } catch (error) {
+      console.error('Error saving blog post:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save blog post",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleBlogDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('blog_posts')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      await fetchData();
+      toast({ title: "Success", description: "Blog post deleted successfully" });
+    } catch (error) {
+      console.error('Error deleting blog post:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete blog post",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleCancel = () => {
     setIsEditMode(false);
-    setEditingProject(null);
-    setFormData({
-      title: "",
-      category: "",
-      description: "",
-      image: "",
-      client: "",
-      year: "",
-      url: "",
+    setEditingItem(null);
+    setPortfolioForm({
+      title: '',
+      category: '',
+      description: '',
+      image_url: '',
+      client: '',
+      year: new Date().getFullYear(),
+      website_url: '',
       featured: false
+    });
+    setBlogForm({
+      title: '',
+      slug: '',
+      excerpt: '',
+      content: '',
+      image_url: '',
+      author: 'Admin ArtWeb',
+      category: '',
+      published: false,
+      read_time: 5
     });
   };
 
-  const stats = [
-    { title: "Total Projects", value: projects.length, color: "from-blue-500 to-cyan-500" },
-    { title: "Featured Projects", value: projects.filter(p => p.featured).length, color: "from-purple-500 to-pink-500" },
-    { title: "E-commerce", value: projects.filter(p => p.category === "ecommerce").length, color: "from-green-500 to-emerald-500" },
-    { title: "Company Profile", value: projects.filter(p => p.category === "company").length, color: "from-orange-500 to-red-500" }
+  const portfolioStats = [
+    {
+      title: "Total Portfolio",
+      value: portfolioItems.length,
+      icon: BarChart3,
+      color: "text-blue-600"
+    },
+    {
+      title: "Featured Items",
+      value: portfolioItems.filter(p => p.featured).length,
+      icon: Eye,
+      color: "text-green-600"
+    },
+    {
+      title: "Total Blog Posts",
+      value: blogPosts.length,
+      icon: FileText,
+      color: "text-purple-600"
+    },
+    {
+      title: "Published Posts",
+      value: blogPosts.filter(p => p.published).length,
+      icon: Users,
+      color: "text-orange-600"
+    }
   ];
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-muted/30 p-6">
-      <div className="container mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Admin Dashboard
-          </h1>
-          <p className="text-muted-foreground">
-            Kelola portfolio dan konten website Artweb
-          </p>
-        </div>
-
-        {/* Stats */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
-            <Card key={index} className="border-none shadow-soft">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${stat.color} flex items-center justify-center`}>
-                    <span className="text-white font-bold text-xl">{stat.value}</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">{stat.title}</h3>
-                    <p className="text-sm text-muted-foreground">Total items</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Actions */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-foreground">
-            Portfolio Management
-          </h2>
-          <Button variant="hero" onClick={() => setIsEditMode(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add New Project
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Admin</h1>
+            <p className="text-gray-600">Kelola portfolio dan konten website</p>
+          </div>
+          <Button onClick={handleSignOut} variant="outline">
+            <LogOut className="w-4 h-4 mr-2" />
+            Logout
           </Button>
         </div>
 
-        {/* Project Form */}
-        {isEditMode && (
-          <Card className="mb-8 border-none shadow-medium">
-            <CardHeader>
-              <CardTitle>
-                {editingProject ? "Edit Project" : "Add New Project"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Project Title
-                  </label>
-                  <Input
-                    value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    placeholder="Enter project title"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Category
-                  </label>
-                  <select 
-                    className="w-full p-3 border border-input rounded-lg bg-background text-foreground"
-                    value={formData.category}
-                    onChange={(e) => setFormData({...formData, category: e.target.value})}
-                  >
-                    <option value="">Select category</option>
-                    {categories.map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Client Name
-                  </label>
-                  <Input
-                    value={formData.client}
-                    onChange={(e) => setFormData({...formData, client: e.target.value})}
-                    placeholder="Enter client name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Year
-                  </label>
-                  <Input
-                    value={formData.year}
-                    onChange={(e) => setFormData({...formData, year: e.target.value})}
-                    placeholder="2024"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Image URL
-                  </label>
-                  <Input
-                    value={formData.image}
-                    onChange={(e) => setFormData({...formData, image: e.target.value})}
-                    placeholder="Enter image URL"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Website URL
-                  </label>
-                  <Input
-                    value={formData.url}
-                    onChange={(e) => setFormData({...formData, url: e.target.value})}
-                    placeholder="https://example.com"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Description
-                </label>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  placeholder="Enter project description"
-                  className="min-h-[100px]"
-                />
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="featured"
-                  checked={formData.featured}
-                  onChange={(e) => setFormData({...formData, featured: e.target.checked})}
-                  className="rounded border-input"
-                />
-                <label htmlFor="featured" className="text-sm text-foreground">
-                  Featured Project
-                </label>
-              </div>
-              
-              <div className="flex space-x-4">
-                <Button variant="hero" onClick={handleSave}>
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Project
-                </Button>
-                <Button variant="outline" onClick={handleCancel}>
-                  <X className="w-4 h-4 mr-2" />
-                  Cancel
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Projects List */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
-            <Card key={project.id} className="border-none shadow-soft hover:shadow-medium transition-shadow">
-              <div className="relative">
-                <img
-                  src={project.image}
-                  alt={project.title}
-                  className="w-full h-48 object-cover rounded-t-lg"
-                />
-                {project.featured && (
-                  <Badge className="absolute top-2 left-2 bg-gradient-hero">
-                    Featured
-                  </Badge>
-                )}
-              </div>
-              
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-bold text-foreground">{project.title}</h3>
-                  <Badge variant="outline">
-                    {categories.find(cat => cat.id === project.category)?.name}
-                  </Badge>
-                </div>
-                
-                <p className="text-sm text-muted-foreground mb-4">
-                  {project.description}
-                </p>
-                
-                <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                  <span>{project.client}</span>
-                  <span>{project.year}</span>
-                </div>
-                
-                <div className="flex space-x-2">
-                  <Button variant="outline" size="sm" onClick={() => handleEdit(project)}>
-                    <Edit className="w-4 h-4 mr-1" />
-                    Edit
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    <Eye className="w-4 h-4 mr-1" />
-                    View
-                  </Button>
-                  <Button 
-                    variant="destructive" 
-                    size="sm"
-                    onClick={() => handleDelete(project.id)}
-                  >
-                    <Trash2 className="w-4 h-4 mr-1" />
-                    Delete
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {portfolioStats.map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <Card key={stat.title}>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">{stat.title}</p>
+                      <p className="text-2xl font-bold">{stat.value}</p>
+                    </div>
+                    <Icon className={`w-8 h-8 ${stat.color}`} />
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
+
+        {/* Main Content */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              Content Management
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+                <TabsTrigger value="blog">Blog</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="portfolio" className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">Portfolio Management</h3>
+                  <Button onClick={() => { setActiveTab('portfolio'); setIsEditMode(true); }} className="flex items-center gap-2">
+                    <Plus className="w-4 h-4" />
+                    Add Portfolio Item
+                  </Button>
+                </div>
+
+                {isEditMode && activeTab === 'portfolio' && (
+                  <div className="bg-gray-50 p-6 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-4">
+                      {editingItem ? 'Edit Portfolio Item' : 'Add New Portfolio Item'}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="title">Title</Label>
+                        <Input
+                          id="title"
+                          value={portfolioForm.title}
+                          onChange={(e) => setPortfolioForm({...portfolioForm, title: e.target.value})}
+                          placeholder="Project title"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="category">Category</Label>
+                        <Select value={portfolioForm.category} onValueChange={(value) => setPortfolioForm({...portfolioForm, category: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Web Development">Web Development</SelectItem>
+                            <SelectItem value="Mobile Development">Mobile Development</SelectItem>
+                            <SelectItem value="UI/UX Design">UI/UX Design</SelectItem>
+                            <SelectItem value="E-Commerce">E-Commerce</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea
+                          id="description"
+                          value={portfolioForm.description}
+                          onChange={(e) => setPortfolioForm({...portfolioForm, description: e.target.value})}
+                          placeholder="Project description"
+                          rows={3}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="image_url">Image URL</Label>
+                        <Input
+                          id="image_url"
+                          value={portfolioForm.image_url}
+                          onChange={(e) => setPortfolioForm({...portfolioForm, image_url: e.target.value})}
+                          placeholder="https://example.com/image.jpg"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="client">Client</Label>
+                        <Input
+                          id="client"
+                          value={portfolioForm.client}
+                          onChange={(e) => setPortfolioForm({...portfolioForm, client: e.target.value})}
+                          placeholder="Client name"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="year">Year</Label>
+                        <Input
+                          id="year"
+                          type="number"
+                          value={portfolioForm.year}
+                          onChange={(e) => setPortfolioForm({...portfolioForm, year: parseInt(e.target.value) || new Date().getFullYear()})}
+                          placeholder="2024"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="website_url">Website URL</Label>
+                        <Input
+                          id="website_url"
+                          value={portfolioForm.website_url}
+                          onChange={(e) => setPortfolioForm({...portfolioForm, website_url: e.target.value})}
+                          placeholder="https://example.com"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="featured"
+                            checked={portfolioForm.featured}
+                            onCheckedChange={(checked) => setPortfolioForm({...portfolioForm, featured: checked})}
+                          />
+                          <Label htmlFor="featured">Featured Project</Label>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-4">
+                      <Button onClick={handlePortfolioSave}>
+                        {editingItem ? 'Update' : 'Save'}
+                      </Button>
+                      <Button variant="outline" onClick={handleCancel}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Portfolio List */}
+                <div className="space-y-4">
+                  {portfolioItems.map((item) => (
+                    <Card key={item.id} className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <img
+                            src={item.image_url}
+                            alt={item.title}
+                            className="w-16 h-16 object-cover rounded"
+                          />
+                          <div>
+                            <h3 className="font-semibold">{item.title}</h3>
+                            <p className="text-sm text-gray-600">{item.description}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="outline">{item.category}</Badge>
+                              <span className="text-sm text-gray-500">{item.client} • {item.year}</span>
+                              {item.featured && (
+                                <Badge variant="secondary">Featured</Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handlePortfolioEdit(item)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => window.open(item.website_url, '_blank')}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handlePortfolioDelete(item.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="blog" className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">Blog Management</h3>
+                  <Button onClick={() => { setActiveTab('blog'); setIsEditMode(true); }} className="flex items-center gap-2">
+                    <Plus className="w-4 h-4" />
+                    Add Blog Post
+                  </Button>
+                </div>
+
+                {isEditMode && activeTab === 'blog' && (
+                  <div className="bg-gray-50 p-6 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-4">
+                      {editingItem ? 'Edit Blog Post' : 'Add New Blog Post'}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="blog_title">Title</Label>
+                        <Input
+                          id="blog_title"
+                          value={blogForm.title}
+                          onChange={(e) => {
+                            setBlogForm({
+                              ...blogForm, 
+                              title: e.target.value,
+                              slug: generateSlug(e.target.value)
+                            });
+                          }}
+                          placeholder="Blog post title"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="blog_slug">Slug</Label>
+                        <Input
+                          id="blog_slug"
+                          value={blogForm.slug}
+                          onChange={(e) => setBlogForm({...blogForm, slug: e.target.value})}
+                          placeholder="blog-post-slug"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="blog_category">Category</Label>
+                        <Select value={blogForm.category} onValueChange={(value) => setBlogForm({...blogForm, category: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Web Development">Web Development</SelectItem>
+                            <SelectItem value="Design">Design</SelectItem>
+                            <SelectItem value="SEO">SEO</SelectItem>
+                            <SelectItem value="Mobile">Mobile</SelectItem>
+                            <SelectItem value="Security">Security</SelectItem>
+                            <SelectItem value="E-Commerce">E-Commerce</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="blog_author">Author</Label>
+                        <Input
+                          id="blog_author"
+                          value={blogForm.author}
+                          onChange={(e) => setBlogForm({...blogForm, author: e.target.value})}
+                          placeholder="Author name"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="blog_image">Image URL</Label>
+                        <Input
+                          id="blog_image"
+                          value={blogForm.image_url}
+                          onChange={(e) => setBlogForm({...blogForm, image_url: e.target.value})}
+                          placeholder="https://example.com/image.jpg"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="read_time">Read Time (minutes)</Label>
+                        <Input
+                          id="read_time"
+                          type="number"
+                          value={blogForm.read_time}
+                          onChange={(e) => setBlogForm({...blogForm, read_time: parseInt(e.target.value) || 5})}
+                          placeholder="5"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label htmlFor="blog_excerpt">Excerpt</Label>
+                        <Textarea
+                          id="blog_excerpt"
+                          value={blogForm.excerpt}
+                          onChange={(e) => setBlogForm({...blogForm, excerpt: e.target.value})}
+                          placeholder="Brief description of the blog post"
+                          rows={2}
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label htmlFor="blog_content">Content</Label>
+                        <Textarea
+                          id="blog_content"
+                          value={blogForm.content}
+                          onChange={(e) => setBlogForm({...blogForm, content: e.target.value})}
+                          placeholder="Blog post content"
+                          rows={8}
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="published"
+                            checked={blogForm.published}
+                            onCheckedChange={(checked) => setBlogForm({...blogForm, published: checked})}
+                          />
+                          <Label htmlFor="published">Published</Label>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-4">
+                      <Button onClick={handleBlogSave}>
+                        {editingItem ? 'Update' : 'Save'}
+                      </Button>
+                      <Button variant="outline" onClick={handleCancel}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Blog List */}
+                <div className="space-y-4">
+                  {blogPosts.map((post) => (
+                    <Card key={post.id} className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <img
+                            src={post.image_url}
+                            alt={post.title}
+                            className="w-16 h-16 object-cover rounded"
+                          />
+                          <div>
+                            <h3 className="font-semibold">{post.title}</h3>
+                            <p className="text-sm text-gray-600">{post.excerpt}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="outline">{post.category}</Badge>
+                              <span className="text-sm text-gray-500">{post.author}</span>
+                              {post.published && (
+                                <Badge variant="secondary">Published</Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleBlogEdit(post)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleBlogDelete(post.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
