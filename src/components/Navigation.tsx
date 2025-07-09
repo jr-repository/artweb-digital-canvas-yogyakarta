@@ -2,17 +2,20 @@ import { useState } from "react";
 import { Menu, X, Phone, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Link, useLocation } from "react-router-dom";
+import Logo from "@/components/Logo";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
-
+  const location = useLocation();
+  
   const navItems = [
-    { name: "Beranda", href: "#home" },
-    { name: "Tentang", href: "#about" },
-    { name: "Layanan", href: "#services" },
-    { name: "Portofolio", href: "#portfolio" },
-    { name: "Harga", href: "#pricing" },
-    { name: "Kontak", href: "#contact" },
+    { name: "Beranda", href: "/" },
+    { name: "Tentang", href: "/about" },
+    { name: "Layanan", href: "/services" },
+    { name: "Portofolio", href: "/portfolio" },
+    { name: "Harga", href: "/pricing" },
+    { name: "Kontak", href: "/contact" },
   ];
 
   return (
@@ -20,25 +23,22 @@ const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center">
-            <div className="bg-gradient-hero text-white p-2 rounded-lg mr-3">
-              <div className="w-6 h-6 bg-white/20 rounded"></div>
-            </div>
-            <span className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-              Artweb
-            </span>
-          </div>
+          <Link to="/">
+            <Logo />
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
-              <a
+              <Link
                 key={item.name}
-                href={item.href}
-                className="text-foreground hover:text-primary transition-colors duration-300 font-medium"
+                to={item.href}
+                className={`text-foreground hover:text-primary transition-colors duration-300 font-medium ${
+                  location.pathname === item.href ? 'text-primary' : ''
+                }`}
               >
                 {item.name}
-              </a>
+              </Link>
             ))}
           </div>
 
@@ -64,14 +64,16 @@ const Navigation = () => {
             <SheetContent>
               <div className="flex flex-col space-y-6 mt-8">
                 {navItems.map((item) => (
-                  <a
+                  <Link
                     key={item.name}
-                    href={item.href}
-                    className="text-lg font-medium text-foreground hover:text-primary transition-colors"
+                    to={item.href}
+                    className={`text-lg font-medium text-foreground hover:text-primary transition-colors ${
+                      location.pathname === item.href ? 'text-primary' : ''
+                    }`}
                     onClick={() => setIsOpen(false)}
                   >
                     {item.name}
-                  </a>
+                  </Link>
                 ))}
                 <div className="flex flex-col space-y-4 pt-6">
                   <Button variant="ghost" className="justify-start">

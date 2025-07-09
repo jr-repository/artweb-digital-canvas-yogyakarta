@@ -1,4 +1,6 @@
 import { Globe, Phone, Mail, MapPin, MessageCircle, Instagram, Music, Heart } from "lucide-react";
+import { Link } from "react-router-dom";
+import Logo from "@/components/Logo";
 
 const FooterSection = () => {
   const services = [
@@ -11,12 +13,12 @@ const FooterSection = () => {
   ];
 
   const quickLinks = [
-    { name: "Beranda", href: "#home" },
-    { name: "Tentang Kami", href: "#about" },
-    { name: "Layanan", href: "#services" },
-    { name: "Portofolio", href: "#portfolio" },
-    { name: "Harga", href: "#pricing" },
-    { name: "Kontak", href: "#contact" }
+    { name: "Beranda", href: "/" },
+    { name: "Tentang Kami", href: "/about" },
+    { name: "Layanan", href: "/services" },
+    { name: "Portofolio", href: "/portfolio" },
+    { name: "Harga", href: "/pricing" },
+    { name: "Kontak", href: "/contact" }
   ];
 
   return (
@@ -25,11 +27,8 @@ const FooterSection = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-6">
-            <div className="flex items-center space-x-3">
-              <div className="bg-white/20 p-2 rounded-lg">
-                <Globe className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold">Artweb</span>
+            <div className="text-white">
+              <Logo className="text-white" />
             </div>
             <p className="text-white/80 leading-relaxed">
               Jasa pembuatan website profesional di Yogyakarta. Menghadirkan solusi digital terbaik untuk bisnis Anda dengan desain modern dan teknologi terkini.
@@ -68,12 +67,12 @@ const FooterSection = () => {
             <ul className="space-y-3">
               {services.map((service, index) => (
                 <li key={index}>
-                  <a
-                    href="#services"
+                  <Link
+                    to="/services"
                     className="text-white/80 hover:text-white transition-colors"
                   >
                     {service}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -85,12 +84,12 @@ const FooterSection = () => {
             <ul className="space-y-3">
               {quickLinks.map((link, index) => (
                 <li key={index}>
-                  <a
-                    href={link.href}
+                  <Link
+                    to={link.href}
                     className="text-white/80 hover:text-white transition-colors"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

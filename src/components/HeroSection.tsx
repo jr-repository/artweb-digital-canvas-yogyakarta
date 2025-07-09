@@ -2,6 +2,7 @@ import { ArrowRight, Play, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import heroImage from "@/assets/hero-image.jpg";
+import heroBg from "@/assets/hero-bg.jpg";
 
 const HeroSection = () => {
   const features = [
@@ -13,8 +14,15 @@ const HeroSection = () => {
 
   return (
     <section id="home" className="relative min-h-screen flex items-center pt-16">
-      {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-hero opacity-5"></div>
+      {/* Background Image */}
+      <div className="absolute inset-0">
+        <img 
+          src={heroBg} 
+          alt="Hero Background" 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-hero/20"></div>
+      </div>
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
