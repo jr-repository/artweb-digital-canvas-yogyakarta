@@ -9,21 +9,34 @@ import ScrollToTop from "@/components/ScrollToTop";
 import portfolioHero from "@/assets/portfolio-hero.jpg";
 
 const Portfolio = () => {
+  useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      easing: 'ease-out-cubic',
+      once: true,
+      offset: 100,
+    });
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      <PageHero
-        backgroundImage={portfolioHero}
-        badge="🎨 Portofolio"
-        title="Karya"
-        subtitle="Terbaik"
-        description="Lihat berbagai project website yang telah kami kerjakan untuk klien dari berbagai industri."
-        primaryButton="Lihat Semua"
-        secondaryButton="Pesan Sekarang"
-      />
+      <div data-aos="fade-up">
+        <PageHero
+          backgroundImage={portfolioHero}
+          badge="🎨 Portofolio"
+          title="Karya"
+          subtitle="Terbaik"
+          description="Lihat berbagai project website yang telah kami kerjakan untuk klien dari berbagai industri."
+          primaryButton="Lihat Semua"
+          secondaryButton="Pesan Sekarang"
+        />
+      </div>
 
-      <PortfolioSection />
+      <div data-aos="fade-up">
+        <PortfolioSection />
+      </div>
       <FooterSection />
     </div>
   );

@@ -110,7 +110,7 @@ const ServicesSection = () => {
 
         {/* Services Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.map((service, index) => (
+          {services.slice(0, 3).map((service, index) => (
             <Card key={index} className={`relative border-none shadow-soft hover:shadow-strong transition-all duration-300 hover:scale-105 ${
               service.popular ? 'ring-2 ring-primary' : ''
             }`}>
@@ -164,15 +164,20 @@ const ServicesSection = () => {
 
         {/* CTA Section */}
         <div className="text-center mt-16">
-          <h3 className="text-2xl font-bold text-foreground mb-4">
+          <h3 className="text-2xl font-display font-bold text-foreground mb-4">
             Butuh Layanan Khusus?
           </h3>
-          <p className="text-muted-foreground mb-6">
+          <p className="text-muted-foreground mb-6 font-sans">
             Konsultasikan kebutuhan website Anda dengan tim ahli kami
           </p>
-          <Button variant="hero" size="lg">
-            Konsultasi Gratis
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button variant="hero" size="lg" onClick={() => window.location.href = '/services'}>
+              Lihat Semua Layanan
+            </Button>
+            <Button variant="outline" size="lg">
+              Konsultasi Gratis
+            </Button>
+          </div>
         </div>
       </div>
     </section>
