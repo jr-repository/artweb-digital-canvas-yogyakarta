@@ -15,6 +15,7 @@ const Navigation = () => {
     { name: "Layanan", href: "/services" },
     { name: "Portofolio", href: "/portfolio" },
     { name: "Harga", href: "/pricing" },
+    { name: "Blog", href: "/blog" },
     { name: "Kontak", href: "/contact" },
   ];
 

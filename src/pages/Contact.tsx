@@ -1,7 +1,11 @@
+import { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 import Navigation from "@/components/Navigation";
 import PageHero from "@/components/PageHero";
 import ContactSection from "@/components/ContactSection";
 import FooterSection from "@/components/FooterSection";
+import ScrollToTop from "@/components/ScrollToTop";
 import contactHero from "@/assets/contact-hero.jpg";
 
 const Contact = () => {

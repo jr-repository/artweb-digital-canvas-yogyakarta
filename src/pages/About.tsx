@@ -1,12 +1,24 @@
+import { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 import Navigation from "@/components/Navigation";
 import PageHero from "@/components/PageHero";
 import FooterSection from "@/components/FooterSection";
+import ScrollToTop from "@/components/ScrollToTop";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, Award, Clock, Heart } from "lucide-react";
 import aboutHero from "@/assets/about-hero.jpg";
 
 const About = () => {
+  useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      easing: 'ease-out-cubic',
+      once: true,
+      offset: 100,
+    });
+  }, []);
   const values = [
     {
       icon: Clock,
@@ -116,6 +128,7 @@ const About = () => {
       </section>
 
       <FooterSection />
+      <ScrollToTop />
     </div>
   );
 };

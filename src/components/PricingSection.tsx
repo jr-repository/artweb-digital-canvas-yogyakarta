@@ -2,6 +2,11 @@ import { Check, Star, Zap, Crown, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 const PricingSection = () => {
   const packages = [
@@ -118,7 +123,7 @@ const PricingSection = () => {
     <section id="pricing" className="py-20 bg-muted/30">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-16" data-aos="fade-up">
           <Badge variant="secondary" className="mb-4">
             💰 Paket Harga
           </Badge>
@@ -134,71 +139,153 @@ const PricingSection = () => {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
-          {packages.map((pkg, index) => (
-            <Card key={index} className={`relative border-none shadow-soft hover:shadow-strong transition-all duration-300 hover:scale-105 ${
-              pkg.popular ? 'ring-2 ring-primary scale-105' : ''
-            }`}>
-              {pkg.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-gradient-hero">
-                    <Sparkles className="w-4 h-4 mr-1" />
-                    Most Popular
-                  </Badge>
-                </div>
-              )}
-              
-              <CardHeader className="text-center pb-4">
-                <div className={`inline-flex p-3 rounded-full bg-gradient-to-r ${pkg.color} mx-auto mb-4`}>
-                  <pkg.icon className="w-8 h-8 text-white" />
-                </div>
-                <CardTitle className="text-2xl font-bold">{pkg.name}</CardTitle>
-                <p className="text-muted-foreground">{pkg.description}</p>
-                
-                <div className="mt-6">
-                  <div className="flex items-center justify-center space-x-2 mb-2">
-                    <span className="text-sm text-muted-foreground line-through">
-                      Rp {pkg.originalPrice}
-                    </span>
-                    <Badge variant="destructive" className="text-xs">
-                      Save {Math.round((1 - parseInt(pkg.price.replace(/\./g, '')) / parseInt(pkg.originalPrice.replace(/\./g, ''))) * 100)}%
+        <div className="mb-16">
+          {/* Desktop Grid */}
+          <div className="hidden md:grid md:grid-cols-3 gap-8">
+            {packages.map((pkg, index) => (
+              <Card key={index} className={`relative border-none shadow-soft hover:shadow-strong transition-all duration-300 hover:scale-105 ${
+                pkg.popular ? 'ring-2 ring-primary scale-105' : ''
+              }`} data-aos="fade-up" data-aos-delay={index * 100}>
+                {pkg.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-gradient-hero">
+                      <Sparkles className="w-4 h-4 mr-1" />
+                      Most Popular
                     </Badge>
                   </div>
-                  <div className="text-4xl font-bold text-primary">
-                    Rp {pkg.price}
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    One-time payment
-                  </p>
-                </div>
-              </CardHeader>
-              
-              <CardContent>
-                <ul className="space-y-3 mb-8">
-                  {pkg.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start space-x-3">
-                      <Check className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-foreground">{feature}</span>
-                    </li>
-                  ))}
-                  {pkg.notIncluded.map((feature, idx) => (
-                    <li key={idx} className="flex items-start space-x-3 opacity-50">
-                      <div className="w-5 h-5 border-2 border-gray-300 rounded-full mt-0.5 flex-shrink-0"></div>
-                      <span className="text-sm text-muted-foreground">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+                )}
                 
-                <Button 
-                  variant={pkg.popular ? "hero" : "outline"} 
-                  className="w-full"
-                  size="lg"
-                >
-                  Pilih {pkg.name}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+                <CardHeader className="text-center pb-4">
+                  <div className={`inline-flex p-3 rounded-full bg-gradient-to-r ${pkg.color} mx-auto mb-4`}>
+                    <pkg.icon className="w-8 h-8 text-white" />
+                  </div>
+                  <CardTitle className="text-2xl font-bold">{pkg.name}</CardTitle>
+                  <p className="text-muted-foreground">{pkg.description}</p>
+                  
+                  <div className="mt-6">
+                    <div className="flex items-center justify-center space-x-2 mb-2">
+                      <span className="text-sm text-muted-foreground line-through">
+                        Rp {pkg.originalPrice}
+                      </span>
+                      <Badge variant="destructive" className="text-xs">
+                        Save {Math.round((1 - parseInt(pkg.price.replace(/\./g, '')) / parseInt(pkg.originalPrice.replace(/\./g, ''))) * 100)}%
+                      </Badge>
+                    </div>
+                    <div className="text-4xl font-bold text-primary">
+                      Rp {pkg.price}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      One-time payment
+                    </p>
+                  </div>
+                </CardHeader>
+                
+                <CardContent>
+                  <ul className="space-y-3 mb-8">
+                    {pkg.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start space-x-3">
+                        <Check className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm text-foreground">{feature}</span>
+                      </li>
+                    ))}
+                    {pkg.notIncluded.map((feature, idx) => (
+                      <li key={idx} className="flex items-start space-x-3 opacity-50">
+                        <div className="w-5 h-5 border-2 border-gray-300 rounded-full mt-0.5 flex-shrink-0"></div>
+                        <span className="text-sm text-muted-foreground">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  <Button 
+                    variant={pkg.popular ? "hero" : "outline"} 
+                    className="w-full"
+                    size="lg"
+                  >
+                    Pilih {pkg.name}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Mobile Swiper */}
+          <div className="md:hidden" data-aos="fade-up">
+            <Swiper
+              modules={[Navigation, Pagination]}
+              spaceBetween={20}
+              slidesPerView={1}
+              navigation
+              pagination={{ clickable: true }}
+              className="pricing-swiper"
+            >
+              {packages.map((pkg, index) => (
+                <SwiperSlide key={index}>
+                  <Card className={`relative border-none shadow-soft ${
+                    pkg.popular ? 'ring-2 ring-primary' : ''
+                  }`}>
+                    {pkg.popular && (
+                      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <Badge className="bg-gradient-hero">
+                          <Sparkles className="w-4 h-4 mr-1" />
+                          Most Popular
+                        </Badge>
+                      </div>
+                    )}
+                    
+                    <CardHeader className="text-center pb-4">
+                      <div className={`inline-flex p-3 rounded-full bg-gradient-to-r ${pkg.color} mx-auto mb-4`}>
+                        <pkg.icon className="w-8 h-8 text-white" />
+                      </div>
+                      <CardTitle className="text-2xl font-bold">{pkg.name}</CardTitle>
+                      <p className="text-muted-foreground">{pkg.description}</p>
+                      
+                      <div className="mt-6">
+                        <div className="flex items-center justify-center space-x-2 mb-2">
+                          <span className="text-sm text-muted-foreground line-through">
+                            Rp {pkg.originalPrice}
+                          </span>
+                          <Badge variant="destructive" className="text-xs">
+                            Save {Math.round((1 - parseInt(pkg.price.replace(/\./g, '')) / parseInt(pkg.originalPrice.replace(/\./g, ''))) * 100)}%
+                          </Badge>
+                        </div>
+                        <div className="text-4xl font-bold text-primary">
+                          Rp {pkg.price}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          One-time payment
+                        </p>
+                      </div>
+                    </CardHeader>
+                    
+                    <CardContent>
+                      <ul className="space-y-3 mb-8">
+                        {pkg.features.map((feature, idx) => (
+                          <li key={idx} className="flex items-start space-x-3">
+                            <Check className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-foreground">{feature}</span>
+                          </li>
+                        ))}
+                        {pkg.notIncluded.map((feature, idx) => (
+                          <li key={idx} className="flex items-start space-x-3 opacity-50">
+                            <div className="w-5 h-5 border-2 border-gray-300 rounded-full mt-0.5 flex-shrink-0"></div>
+                            <span className="text-sm text-muted-foreground">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      
+                      <Button 
+                        variant={pkg.popular ? "hero" : "outline"} 
+                        className="w-full"
+                        size="lg"
+                      >
+                        Pilih {pkg.name}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
         </div>
 
         {/* Additional Services */}

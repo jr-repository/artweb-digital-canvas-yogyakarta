@@ -116,3 +116,40 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .bg-gradient-hero {
+    background: var(--gradient-hero);
+  }
+  
+  .bg-gradient-card {
+    background: var(--gradient-card);
+  }
+  
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+  
+  .shadow-medium {
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .shadow-strong {
+    box-shadow: var(--shadow-strong);
+  }
+}
+
+/* Swiper customization */
+.pricing-swiper .swiper-pagination-bullet {
+  background: hsl(var(--primary));
+  opacity: 0.5;
+}
+
+.pricing-swiper .swiper-pagination-bullet-active {
+  opacity: 1;
+}
+
+.pricing-swiper .swiper-button-next,
+.pricing-swiper .swiper-button-prev {
+  color: hsl(var(--primary));
+}

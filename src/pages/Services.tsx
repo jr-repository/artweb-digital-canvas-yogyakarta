@@ -1,7 +1,11 @@
+import { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 import Navigation from "@/components/Navigation";
 import PageHero from "@/components/PageHero";
 import ServicesSection from "@/components/ServicesSection";
 import FooterSection from "@/components/FooterSection";
+import ScrollToTop from "@/components/ScrollToTop";
 import servicesHero from "@/assets/services-hero.jpg";
 
 const Services = () => {

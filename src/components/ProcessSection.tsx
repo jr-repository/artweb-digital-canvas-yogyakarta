@@ -45,7 +45,7 @@ const ProcessSection = () => {
     <section className="py-20 bg-gradient-card">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-16" data-aos="fade-up">
           <Badge variant="secondary" className="mb-4">
             🔄 Alur Kerja
           </Badge>
@@ -60,60 +60,45 @@ const ProcessSection = () => {
           </p>
         </div>
 
-        {/* Steps */}
-        <div className="relative">
+        {/* Steps - Horizontal Layout */}
+        <div className="relative" data-aos="fade-up">
           {/* Progress Line */}
-          <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-hero transform -translate-x-1/2 hidden md:block"></div>
+          <div className="absolute top-16 left-0 right-0 h-0.5 bg-gradient-hero hidden md:block"></div>
           
-          <div className="space-y-12">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
             {steps.map((step, index) => (
-              <div key={index} className={`relative flex items-center ${
-                index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-              }`}>
+              <div key={index} className="relative" data-aos="fade-up" data-aos-delay={index * 100}>
                 {/* Step Number */}
-                <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden md:block">
+                <div className="relative z-10 mb-6 flex justify-center">
                   <div className="w-12 h-12 bg-white rounded-full border-4 border-primary flex items-center justify-center shadow-medium">
                     <span className="text-primary font-bold text-lg">{index + 1}</span>
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className={`w-full md:w-5/12 ${
-                  index % 2 === 0 ? 'md:pr-12' : 'md:pl-12'
-                }`}>
-                  <Card className="border-none shadow-medium hover:shadow-strong transition-all duration-300">
-                    <CardContent className="p-6">
-                      <div className="flex items-center space-x-4 mb-4">
-                        <div className={`p-3 rounded-lg bg-gradient-to-r ${step.color}`}>
-                          <step.icon className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="text-xl font-bold text-foreground">{step.title}</h3>
-                          <Badge variant="outline" className="mt-1">
-                            {step.duration}
-                          </Badge>
-                        </div>
+                <Card className="border-none shadow-medium hover:shadow-strong transition-all duration-300 h-full">
+                  <CardContent className="p-6 text-center">
+                    <div className="flex justify-center mb-4">
+                      <div className={`p-3 rounded-lg bg-gradient-to-r ${step.color}`}>
+                        <step.icon className="w-6 h-6 text-white" />
                       </div>
-                      <p className="text-muted-foreground">
-                        {step.description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Mobile Step Number */}
-                <div className="md:hidden absolute -left-4 top-1/2 transform -translate-y-1/2">
-                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">{index + 1}</span>
-                  </div>
-                </div>
+                    </div>
+                    <h3 className="text-lg font-bold text-foreground mb-2">{step.title}</h3>
+                    <Badge variant="outline" className="mb-4">
+                      {step.duration}
+                    </Badge>
+                    <p className="text-muted-foreground text-sm">
+                      {step.description}
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
             ))}
           </div>
         </div>
 
         {/* CTA */}
-        <div className="text-center mt-16">
+        <div className="text-center mt-16" data-aos="fade-up">
           <div className="bg-white rounded-2xl p-8 shadow-medium max-w-2xl mx-auto">
             <h3 className="text-2xl font-bold text-foreground mb-4">
               Siap Memulai Project Anda?
