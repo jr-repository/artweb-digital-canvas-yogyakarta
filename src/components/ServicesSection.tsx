@@ -84,7 +84,7 @@ const ServicesSection = () => {
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
             Layanan{" "}
-            <span className="bg-gradient-hero bg-clip-text text-transparent">
+            <span className="text-gradient-hero">
               Profesional
             </span>
           </h2>

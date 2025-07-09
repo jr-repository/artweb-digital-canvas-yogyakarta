@@ -51,7 +51,7 @@ const ProcessSection = () => {
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
             Proses{" "}
-            <span className="bg-gradient-hero bg-clip-text text-transparent">
+            <span className="text-gradient-hero">
               Pengerjaan
             </span>
           </h2>
