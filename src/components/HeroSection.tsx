@@ -35,11 +35,11 @@ const HeroSection = () => {
               
               <h1 className="text-4xl md:text-6xl font-bold leading-tight">
                 <span className="text-foreground">Bangun Website</span>{" "}
-                <span className="bg-gradient-hero bg-clip-text text-transparent font-extrabold">
+                <span className="text-gradient-hero font-extrabold">
                   Impianmu
                 </span>{" "}
                 <span className="text-foreground">Bersama</span>{" "}
-                <span className="bg-gradient-hero bg-clip-text text-transparent font-extrabold">
+                <span className="text-gradient-hero font-extrabold">
                   Artweb
                 </span>
               </h1>
