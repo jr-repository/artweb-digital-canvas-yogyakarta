@@ -13,6 +13,7 @@ import WhyChooseUsSection from "@/components/WhyChooseUsSection";
 import FooterSection from "@/components/FooterSection";
 import ScrollToTop from "@/components/ScrollToTop";
 import LoadingScreen from "@/components/LoadingScreen";
+import DomainChecker from "@/components/DomainChecker";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -109,6 +110,9 @@ const Index = () => {
           </div>
         </section>
         
+        <div data-aos="fade-up">
+          <DomainChecker />
+        </div>
         <div data-aos="fade-up">
           <ServicesSection />
         </div>
