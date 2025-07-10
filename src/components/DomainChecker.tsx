@@ -7,13 +7,13 @@ import { Search, CheckCircle, XCircle, Globe, Loader } from 'lucide-react';
 const DomainChecker = () => {
   const [domain, setDomain] = useState('');
   const [isChecking, setIsChecking] = useState(false);
-  const [results, setResults] = useState<{ domain: string; available: boolean; extension: string }[]>([]);
+  const [results, setResults] = useState<{ domain: string; available: boolean; extension: string; isSearched?: boolean }[]>([]);
 
   const domainExtensions = ['.com', '.id', '.net', '.org', '.co.id', '.web.id'];
 
   const simulateCheck = (domainName: string, extension: string): boolean => {
     // Simulate random availability for demo purposes
-    const commonDomains = ['google', 'facebook', 'youtube', 'amazon', 'twitter', 'instagram'];
+    const commonDomains = ['google', 'facebook', 'youtube', 'amazon', 'twitter', 'instagram', 'microsoft', 'apple'];
     if (commonDomains.includes(domainName.toLowerCase())) {
       return false; // These are definitely taken
     }
@@ -29,12 +29,46 @@ const DomainChecker = () => {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    const cleanDomain = domain.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const checkResults = domainExtensions.map(ext => ({
+    let domainName = domain.toLowerCase().trim();
+    let searchedExtension = '';
+    
+    // Check if user entered a full domain (with extension)
+    const hasExtension = domainExtensions.some(ext => domainName.endsWith(ext));
+    
+    if (hasExtension) {
+      // Extract domain name and extension
+      const foundExt = domainExtensions.find(ext => domainName.endsWith(ext));
+      if (foundExt) {
+        searchedExtension = foundExt;
+        domainName = domainName.replace(foundExt, '');
+      }
+    }
+    
+    // Clean domain name (remove special characters but keep basic structure)
+    const cleanDomain = domainName.replace(/[^a-z0-9-]/g, '');
+    
+    let checkResults = [];
+    
+    // If user searched for specific domain, check that first
+    if (searchedExtension) {
+      checkResults.push({
+        domain: cleanDomain + searchedExtension,
+        available: simulateCheck(cleanDomain, searchedExtension),
+        extension: searchedExtension,
+        isSearched: true
+      });
+    }
+    
+    // Add alternatives with other extensions
+    const alternativeExtensions = domainExtensions.filter(ext => ext !== searchedExtension);
+    const alternatives = alternativeExtensions.map(ext => ({
       domain: cleanDomain + ext,
       available: simulateCheck(cleanDomain, ext),
-      extension: ext
+      extension: ext,
+      isSearched: false
     }));
+    
+    checkResults = [...checkResults, ...alternatives];
     
     setResults(checkResults);
     setIsChecking(false);
@@ -64,7 +98,7 @@ const DomainChecker = () => {
               <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
               <Input
                 type="text"
-                placeholder="Masukkan nama domain (contoh: bisnisku)"
+                placeholder="Masukkan nama domain (contoh: artweb.com atau bisnisku)"
                 value={domain}
                 onChange={(e) => setDomain(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -76,7 +110,7 @@ const DomainChecker = () => {
               onClick={handleCheck}
               disabled={isChecking || !domain.trim()}
               size="lg"
-              className="h-12 px-8 group"
+              className="h-12 px-8 bg-gradient-hero hover:shadow-glow transition-all duration-300 text-white border-0"
             >
               {isChecking ? (
                 <Loader className="w-5 h-5 mr-2 animate-spin" />
@@ -106,7 +140,7 @@ const DomainChecker = () => {
                     {result.available && (
                       <Button 
                         size="sm" 
-                        className="w-full mt-3"
+                        className="w-full mt-3 bg-gradient-hero hover:shadow-glow transition-all duration-300 text-white border-0"
                         onClick={() => window.open(`https://wa.me/6287821957335?text=Halo%20Artweb,%20saya%20tertarik%20dengan%20domain%20${result.domain}%20dan%20ingin%20konsultasi%20untuk%20pembuatan%20website`, '_blank')}
                       >
                         Konsultasi Domain
@@ -127,7 +161,7 @@ const DomainChecker = () => {
                 Tim kami siap membantu Anda memilih domain terbaik untuk bisnis Anda
               </p>
               <Button 
-                variant="default"
+                className="bg-gradient-hero hover:shadow-glow transition-all duration-300 text-white border-0"
                 onClick={() => window.open('https://wa.me/6287821957335?text=Halo%20Artweb,%20saya%20butuh%20bantuan%20memilih%20domain%20untuk%20website%20saya', '_blank')}
               >
                 Konsultasi Gratis
