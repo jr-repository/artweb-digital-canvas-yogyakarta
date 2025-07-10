@@ -15,15 +15,16 @@ const LoadingScreen = () => {
   if (!loading) return null;
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-gradient-to-br from-primary via-background to-secondary flex items-center justify-center z-50">
       <div className="text-center">
         <div className="relative mb-8">
-          <div className="absolute inset-0 bg-gradient-hero rounded-full blur-xl opacity-60 animate-pulse"></div>
-          <div className="relative bg-white/10 backdrop-blur-sm rounded-full p-8 border border-white/20">
+          <div className="absolute inset-0 bg-gradient-hero rounded-full blur-xl animate-pulse"></div>
+          <div className="relative bg-gradient-to-r from-primary/30 to-secondary/30 backdrop-blur-sm rounded-full p-8 border border-primary/50 shadow-glow">
             <img
               src={logoImage}
               alt="Artweb Logo"
-              className="w-16 h-16 mx-auto animate-bounce"
+              className="w-20 h-20 mx-auto animate-spin"
+              style={{ animationDuration: '3s' }}
             />
           </div>
         </div>

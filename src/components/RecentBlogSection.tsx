@@ -169,7 +169,10 @@ const RecentBlogSection = () => {
             modules={[Navigation, Pagination]}
             spaceBetween={20}
             slidesPerView={1}
-            navigation
+            navigation={{
+              nextEl: '.blog-swiper .swiper-button-next',
+              prevEl: '.blog-swiper .swiper-button-prev',
+            }}
             pagination={{ clickable: true }}
             className="blog-swiper"
           >

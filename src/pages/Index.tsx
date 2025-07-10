@@ -9,6 +9,7 @@ import RecentBlogSection from "@/components/RecentBlogSection";
 import ProcessSection from "@/components/ProcessSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import CTABannerSection from "@/components/CTABannerSection";
+import WhyChooseUsSection from "@/components/WhyChooseUsSection";
 import FooterSection from "@/components/FooterSection";
 import ScrollToTop from "@/components/ScrollToTop";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -116,6 +117,9 @@ const Index = () => {
         </div>
         <div data-aos="fade-up">
           <RecentBlogSection />
+        </div>
+        <div data-aos="fade-up">
+          <WhyChooseUsSection />
         </div>
         <div data-aos="fade-up">
           <ProcessSection />

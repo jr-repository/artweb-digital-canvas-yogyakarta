@@ -149,7 +149,10 @@ const RecentPortfolioSection = () => {
             modules={[Navigation, Pagination]}
             spaceBetween={20}
             slidesPerView={1}
-            navigation
+            navigation={{
+              nextEl: '.portfolio-swiper .swiper-button-next',
+              prevEl: '.portfolio-swiper .swiper-button-prev',
+            }}
             pagination={{ clickable: true }}
             className="portfolio-swiper"
           >

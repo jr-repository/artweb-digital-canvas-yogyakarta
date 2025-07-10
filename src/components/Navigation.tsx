@@ -22,7 +22,7 @@ const Navigation = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border/50 shadow-elegant">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-18">
+        <div className="flex items-center justify-between h-20">
           <div className="flex items-center space-x-2">
             <Link to="/">
               <Logo />
@@ -47,11 +47,21 @@ const Navigation = () => {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="outline" size="sm" className="font-sans border-2 hover:border-primary/50 transition-all duration-300">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="font-sans border-2 hover:border-primary/50 transition-all duration-300"
+              onClick={() => window.open('https://wa.me/6287821957335', '_blank')}
+            >
               <Phone className="w-4 h-4 mr-2" />
               Telepon
             </Button>
-            <Button variant="hero" size="sm" className="font-sans shadow-glow hover:shadow-strong transition-all duration-300">
+            <Button 
+              variant="hero" 
+              size="sm" 
+              className="font-sans shadow-glow hover:shadow-strong transition-all duration-300"
+              onClick={() => window.open('https://wa.me/6287821957335', '_blank')}
+            >
               <MessageCircle className="w-4 h-4 mr-2" />
               Chat WhatsApp
             </Button>
@@ -87,11 +97,21 @@ const Navigation = () => {
                 </div>
                 
                 <div className="space-y-4 pt-8 border-t border-border/50">
-                  <Button variant="outline" size="sm" className="w-full font-sans border-2 hover:border-primary/50 transition-all duration-300">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full font-sans border-2 hover:border-primary/50 transition-all duration-300"
+                    onClick={() => window.open('https://wa.me/6287821957335', '_blank')}
+                  >
                     <Phone className="w-4 h-4 mr-2" />
                     Telepon
                   </Button>
-                  <Button variant="hero" size="sm" className="w-full font-sans shadow-glow hover:shadow-strong transition-all duration-300">
+                  <Button 
+                    variant="hero" 
+                    size="sm" 
+                    className="w-full font-sans shadow-glow hover:shadow-strong transition-all duration-300"
+                    onClick={() => window.open('https://wa.me/6287821957335', '_blank')}
+                  >
                     <MessageCircle className="w-4 h-4 mr-2" />
                     Chat WhatsApp
                   </Button>
